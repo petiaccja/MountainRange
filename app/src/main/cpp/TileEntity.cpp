@@ -12,7 +12,9 @@ void TileEntity::SetTile(const GeometryTile& tile) {
 	GLuint vbuffer = 0;
 	GLuint ibuffer = 0;
 	glGenBuffers(1, &vbuffer); // Create vertex buffer.
+	assert(glGetError() == GL_NO_ERROR);
 	glGenBuffers(1, &ibuffer); // Create index buffer.
+	assert(glGetError() == GL_NO_ERROR);
 
 	// Pack vertices.
 	const std::vector<VertexPNT>& tileVertices = tile.GetVertices();
@@ -28,11 +30,15 @@ void TileEntity::SetTile(const GeometryTile& tile) {
 
 	// Upload vertices.
 	glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
+	assert(glGetError() == GL_NO_ERROR);
 	glBufferData(GL_ARRAY_BUFFER, packedVertices.size()*sizeof(VertexPNT_Packed), packedVertices.data(), GL_STATIC_DRAW);
+	assert(glGetError() == GL_NO_ERROR);
 
 	// Upload indices.
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibuffer);
+	assert(glGetError() == GL_NO_ERROR);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(uint32_t), indices.data(), GL_STATIC_DRAW);
+	assert(glGetError() == GL_NO_ERROR);
 	m_indexCount = (unsigned)indices.size();
 
 	if (glGetError() != GL_NO_ERROR) {

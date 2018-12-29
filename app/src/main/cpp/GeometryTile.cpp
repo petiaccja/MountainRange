@@ -4,7 +4,9 @@ namespace mrange {
 
 
 GeometryTile::GeometryTile(int subdivisions) {
-	auto [vertices, indices] = MakeTriangulation(Vec2(1.f, 1.f), subdivisions);
+	m_gridWidth = subdivisions;
+	m_gridHeight = subdivisions;
+	auto [vertices, indices] = MakeTriangulation(Vec2(1.f, 1.f), subdivisions, subdivisions);
 	m_vertices = std::move(vertices);
 	m_indices = std::move(indices);
 }
@@ -56,23 +58,34 @@ void GeometryTile::ApplyHeightmap(const Image<uint16_t>& heightmap, float minLev
 }
 
 
-void GeometryTile::RecomputeNormals() {
-
+void GeometryTile::ApplyHeightmap(const Image<float>& heightmap) {
+	for (auto& vertex : m_vertices) {
+		float height = heightmap.SampleBilinear(vertex.texcoord);
+		vertex.position.z += height;
+	}
 }
 
 
-auto GeometryTile::MakeTriangulation(Vec2 size, int subdivisions)
+void GeometryTile::RecomputeNormals() {
+	std::vector<Vec3> normals(m_vertices.size());
+	for (size_t i=0; i<m_indices.size(); i+=3) {
+		// add up all triangle normals and average them
+	}
+}
+
+
+auto GeometryTile::MakeTriangulation(Vec2 size, size_t gridWidth, size_t gridHeight)
 	-> std::pair<std::vector<VertexPNT>, std::vector<uint32_t>>
 {
 	std::vector<VertexPNT> vertices;
 	std::vector<uint32_t> indices;
 
 	// Generate vertices.
-	for (uint32_t y = 0; y <= subdivisions; ++y) {
-		for (uint32_t x = 0; x <= subdivisions; ++x) {
+	for (uint32_t y = 0; y <= gridHeight; ++y) {
+		for (uint32_t x = 0; x <= gridWidth; ++x) {
 			Vec3 normal = { 0,0,1 };
 			Vec2 pos = { x, y };
-			Vec2 texcoord = pos / float(subdivisions);
+			Vec2 texcoord = pos / Vec2(float(gridWidth), float(gridHeight));
 			pos = texcoord - Vec2(0.5f, 0.5f);
 			pos *= size;
 			vertices.push_back({ pos | 0, normal, texcoord });
@@ -80,17 +93,17 @@ auto GeometryTile::MakeTriangulation(Vec2 size, int subdivisions)
 	}
 
 	// Generate triangles.
-	auto LinearizeIndex = [subdivisions](Vec2u index) -> uint32_t {
-		return index.y*subdivisions + index.x;
+	auto LinearizeIndex = [gridWidth, gridHeight](Vec2u index) -> uint32_t {
+		return index.y*(gridWidth+1) + index.x;
 	};
-	for (uint32_t y = 0; y < subdivisions; ++y) {
-		for (uint32_t x = 0; x < subdivisions; ++x) {
+	for (uint32_t y = 0; y < gridHeight; ++y) {
+		for (uint32_t x = 0; x < gridWidth; ++x) {
 			Vec2u quadIdx = { x,y };
 			Vec2u vertIdx[4] = {
 					quadIdx,
-					quadIdx + Vec2i{0, 1},
-					quadIdx + Vec2i{1, 1},
-					quadIdx + Vec2i{1, 0},
+					quadIdx + Vec2u{0, 1},
+					quadIdx + Vec2u{1, 1},
+					quadIdx + Vec2u{1, 0},
 			};
 
 			// One triangle.
@@ -106,6 +119,18 @@ auto GeometryTile::MakeTriangulation(Vec2 size, int subdivisions)
 	}
 
 	return { vertices, indices };
+}
+
+const VertexPNT &GeometryTile::GetVertex(size_t x, size_t y) const {
+	assert(x < m_gridWidth);
+	assert(y < m_gridHeight);
+	return m_vertices[y*(m_gridWidth+1) + x];
+}
+
+VertexPNT &GeometryTile::GetVertex(size_t x, size_t y) {
+	assert(x < m_gridWidth);
+	assert(y < m_gridHeight);
+	return m_vertices[y*(m_gridWidth+1) + x];;
 }
 
 

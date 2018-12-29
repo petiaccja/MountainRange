@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Platform.hpp"
+#include "BasicCamera.hpp"
 
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
@@ -18,11 +19,11 @@ public:
 	Renderer(Renderer&&) = delete;
 	~Renderer();
 
-	void DrawScene(const Scene& scene);
-
+	void DrawScene(const Scene& scene, const BasicCamera& camera);
 private:
 	void LoadShaders();
 	void LoadVao();
+	void SetDrawingState();
 
 private:
 	const PlatformHelper* m_platformHelper = nullptr;

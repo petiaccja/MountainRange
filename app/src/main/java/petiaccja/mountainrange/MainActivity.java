@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         tv.setText(getCompilerVersion());
 
         terrainView = (NativeSurfaceView)findViewById(R.id.terrain_view);
-		JniBridge.Init(this, getAssets());
+        terrainView.initCrapGl(this, getAssets());
     }
 
     @Override

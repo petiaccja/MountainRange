@@ -3,9 +3,9 @@
 uniform mat4 g_worldViewProj;
 uniform mat4 g_world;
 
-in vec3 lPosition;
-in vec3 lNormal;
-in vec2 lTexcoord;
+layout(location = 0) in vec3 lPosition;
+layout(location = 1) in vec3 lNormal;
+layout(location = 2) in vec2 lTexcoord;
 
 out vec4 hPosition;
 out vec3 wNormal;
@@ -16,4 +16,6 @@ void main() {
 	hPosition = vec4(lPosition, 1)*g_worldViewProj;
 	wNormal = normalize(lNormal*mat3(g_world));
 	hTexcoord = lTexcoord;
+
+	gl_Position = hPosition;
 }

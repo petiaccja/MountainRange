@@ -11,7 +11,7 @@
 #include "Renderer.hpp"
 #include "Scene.hpp"
 #include "TileEntity.hpp"
-#include <optional>
+#include "PerspectiveCamera.hpp"
 
 #include <android/asset_manager_jni.h>
 
@@ -24,6 +24,7 @@ static std::unique_ptr<PlatformHelper> g_platformHelper;
 static std::unique_ptr<Renderer> g_renderer;
 static std::unique_ptr<Scene> g_scene;
 static std::unique_ptr<TileEntity> g_testTile;
+static PerspectiveCamera g_camera;
 
 
 
@@ -36,10 +37,25 @@ JNIEXPORT void JNICALL Java_petiaccja_mountainrange_JniBridge_Init(JNIEnv* env, 
 	g_scene = std::make_unique<Scene>();
 	g_testTile = std::make_unique<TileEntity>();
 
+
+	g_camera.SetPosition({2.0f, 1.0f, 0.8f});
+	g_camera.SetFOVAspect(Rad2Deg(60.f), 1.0f/1.8f);
+	g_camera.SetTarget({0.0f, 0.0f, 0.0f});
+	g_camera.SetFarPlane(5.0f);
+	g_camera.SetNearPlane(0.05f);
+
 	// Set up test scene.
 	g_scene->AddEntity(g_testTile.get());
 
 	GeometryTile tile(16);
+	Image<float> image(8, 8);
+	for (int i=0; i<8; ++i) {
+		for (int j=0; j<8; ++j) {
+			image(i,j) = (i*j)%3 * 0.05f;
+		}
+	}
+	tile.ApplyHeightmap(image);
+	tile.RecomputeNormals();
 	g_testTile->SetTile(tile);
 }
 
@@ -55,7 +71,7 @@ JNIEXPORT void JNICALL Java_petiaccja_mountainrange_JniBridge_OnDrawFrame() {
 	glClearColor(red, 0.5f, blue, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	g_renderer->DrawScene(*g_scene.get());
+	g_renderer->DrawScene(*g_scene, g_camera);
 }
 
 

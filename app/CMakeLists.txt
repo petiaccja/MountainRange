@@ -20,6 +20,13 @@ set(sources
         src/main/cpp/Vertex.hpp
         )
 
+set(extra
+		src/main/cpp/BasicCamera.hpp
+		src/main/cpp/BasicCamera.cpp
+		src/main/cpp/PerspectiveCamera.hpp
+		src/main/cpp/PerspectiveCamera.cpp
+		)
+
 set(rendering
         src/main/cpp/TileEntity.cpp
         src/main/cpp/TileEntity.hpp
@@ -31,7 +38,7 @@ set(rendering
 		src/main/cpp/Platform.hpp
 		)
 
-add_library(native-lib SHARED ${sources} ${rendering})
+add_library(native-lib SHARED ${sources} ${rendering} ${extra})
 
 
 find_library(log-lib log )

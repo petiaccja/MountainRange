@@ -32,53 +32,29 @@ Renderer::~Renderer() {
 }
 
 
-void Renderer::DrawScene(const Scene& scene) {
+void Renderer::DrawScene(const Scene& scene, const BasicCamera& camera) {
 	if (!m_isGlBullshitInit) {
 		LoadShaders();
 		LoadVao();
 		m_isGlBullshitInit = true;
 	}
 
+	SetDrawingState();
 
-
-	// Bind this fucking retarded concept called "VAO". It totally makes fucking sense.
-	// Also, it's an "array object", but let's just bind it as "array buffer" because fuck all the developers.
-	glBindBuffer(GL_ARRAY_BUFFER, m_vao);
-	assert(glGetError() == GL_NO_ERROR);
-	glUseProgram(m_shaderProgram);
-	assert(glGetError() == GL_NO_ERROR);
-
-
-	// Set vertex format.
-	glBindVertexArray(m_vao);
-
-	glEnableVertexAttribArray(0);
-	assert(glGetError() == GL_NO_ERROR);
-	glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, 0);
-	assert(glGetError() == GL_NO_ERROR);
-	glVertexAttribBinding(0, 0);
-	assert(glGetError() == GL_NO_ERROR);
-	glEnableVertexAttribArray(1);
-	assert(glGetError() == GL_NO_ERROR);
-	glVertexAttribFormat(1, 3, GL_FLOAT, GL_FALSE, offsetof(VertexPNT_Packed, normal));
-	assert(glGetError() == GL_NO_ERROR);
-	glVertexAttribBinding(1, 0);
-	assert(glGetError() == GL_NO_ERROR);
-	glEnableVertexAttribArray(2);
-	assert(glGetError() == GL_NO_ERROR);
-	glVertexAttribFormat(2, 2, GL_FLOAT, GL_FALSE, offsetof(VertexPNT_Packed, texcoord));
-	assert(glGetError() == GL_NO_ERROR);
-	glVertexAttribBinding(2, 0);
-	assert(glGetError() == GL_NO_ERROR);
-
+	// Get camera matrices.
+	Mat44 view = camera.GetViewMatrix();
+	Mat44 proj = camera.GetProjectionMatrix();
 
 
 	CbTransform cbTransform;
 
+	// Render all entities.
 	for (auto& tileEntity : scene) {
+		Mat44 world = Mat44::Identity();
+
 		// Set cbuffer.
-		cbTransform.worldViewProj.SetIdentity();
-		cbTransform.world.SetIdentity();
+		cbTransform.worldViewProj = world*view*proj;
+		cbTransform.world = world;
 
 		assert(glGetError() == GL_NO_ERROR);
 		auto worldViewProjLoc = glGetUniformLocation(m_shaderProgram, "g_worldViewProj");
@@ -87,7 +63,6 @@ void Renderer::DrawScene(const Scene& scene) {
 		glUniformMatrix4fv(worldViewProjLoc, 1, false, (float*)&cbTransform.worldViewProj);
 		glUniformMatrix4fv(worldLoc, 1, false, (float*)&cbTransform.world);
 		assert(glGetError() == GL_NO_ERROR);
-
 
 		// Bind vertex buffer.
 		glBindVertexBuffer(0, tileEntity->GetVertexBuffer(), 0, sizeof(VertexPNT_Packed));
@@ -164,6 +139,39 @@ void Renderer::LoadShaders() {
 
 void Renderer::LoadVao() {
 	glGenVertexArrays(1, &m_vao);
+	assert(glGetError() == GL_NO_ERROR);
+}
+
+void Renderer::SetDrawingState() {
+	// Set state
+	glClearDepthf(1.0f);
+	glDisable(GL_DEPTH_TEST);
+	glDepthRangef(-1.0f, 1.0f);
+	glUseProgram(m_shaderProgram);
+	assert(glGetError() == GL_NO_ERROR);
+
+	// Set vertex format.
+	glBindVertexArray(m_vao);
+
+	glEnableVertexAttribArray(0);
+	assert(glGetError() == GL_NO_ERROR);
+	glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, 0);
+	assert(glGetError() == GL_NO_ERROR);
+	glVertexAttribBinding(0, 0);
+	assert(glGetError() == GL_NO_ERROR);
+
+	glEnableVertexAttribArray(1);
+	assert(glGetError() == GL_NO_ERROR);
+	glVertexAttribFormat(1, 3, GL_FLOAT, GL_FALSE, offsetof(VertexPNT_Packed, normal));
+	assert(glGetError() == GL_NO_ERROR);
+	glVertexAttribBinding(1, 0);
+	assert(glGetError() == GL_NO_ERROR);
+
+	glEnableVertexAttribArray(2);
+	assert(glGetError() == GL_NO_ERROR);
+	glVertexAttribFormat(2, 2, GL_FLOAT, GL_FALSE, offsetof(VertexPNT_Packed, texcoord));
+	assert(glGetError() == GL_NO_ERROR);
+	glVertexAttribBinding(2, 0);
 	assert(glGetError() == GL_NO_ERROR);
 }
 
