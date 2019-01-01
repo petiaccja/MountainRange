@@ -13,32 +13,35 @@ include_directories(libs/include)
 
 set(sources
         src/main/cpp/native-lib.cpp
-        src/main/cpp/GeometryTile.cpp
-        src/main/cpp/GeometryTile.hpp
-        src/main/cpp/Image.cpp
-        src/main/cpp/Image.hpp
-        src/main/cpp/Vertex.hpp
+		)
+
+set(resources
+        src/main/cpp/Resources/GeometryTile.cpp
+        src/main/cpp/Resources/GeometryTile.hpp
+        src/main/cpp/Resources/Image.cpp
+        src/main/cpp/Resources/Image.hpp
+        src/main/cpp/Resources/Vertex.hpp
         )
 
-set(extra
-		src/main/cpp/BasicCamera.hpp
-		src/main/cpp/BasicCamera.cpp
-		src/main/cpp/PerspectiveCamera.hpp
-		src/main/cpp/PerspectiveCamera.cpp
+set(platform
+		src/main/cpp/Platform/Platform.cpp
+		src/main/cpp/Platform/Platform.hpp
 		)
 
 set(rendering
-        src/main/cpp/TileEntity.cpp
-        src/main/cpp/TileEntity.hpp
-        src/main/cpp/Scene.cpp
-        src/main/cpp/Scene.hpp
-        src/main/cpp/Renderer.cpp
-        src/main/cpp/Renderer.hpp
-		src/main/cpp/Platform.cpp
-		src/main/cpp/Platform.hpp
+		src/main/cpp/Rendering/BasicCamera.hpp
+		src/main/cpp/Rendering/BasicCamera.cpp
+		src/main/cpp/Rendering/PerspectiveCamera.hpp
+		src/main/cpp/Rendering/PerspectiveCamera.cpp
+        src/main/cpp/Rendering/TileEntity.cpp
+        src/main/cpp/Rendering/TileEntity.hpp
+        src/main/cpp/Rendering/Scene.cpp
+        src/main/cpp/Rendering/Scene.hpp
+        src/main/cpp/Rendering/Renderer.cpp
+        src/main/cpp/Rendering/Renderer.hpp
 		)
 
-add_library(native-lib SHARED ${sources} ${rendering} ${extra})
+add_library(native-lib SHARED ${sources} ${resources} ${platform} ${rendering})
 
 
 find_library(log-lib log )

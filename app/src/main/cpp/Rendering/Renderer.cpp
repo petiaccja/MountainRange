@@ -1,7 +1,6 @@
 #include "Renderer.hpp"
 #include "Scene.hpp"
 #include "TileEntity.hpp"
-#include "Vertex.hpp"
 
 #include <GLES3/gl31.h>
 

@@ -67,9 +67,26 @@ void GeometryTile::ApplyHeightmap(const Image<float>& heightmap) {
 
 
 void GeometryTile::RecomputeNormals() {
-	std::vector<Vec3> normals(m_vertices.size());
+	std::vector<Vec3> normals;
+	normals.resize(m_vertices.size(), Vec3(0.0f));
+
+	// Add up all triangle normals and average them.
 	for (size_t i=0; i<m_indices.size(); i+=3) {
-		// add up all triangle normals and average them
+		int i0 = m_indices[i];
+		int i1 = m_indices[i+1];
+		int i2 = m_indices[i+2];
+		const Vec3& p0 = m_vertices[i0].position;
+		const Vec3& p1 = m_vertices[i1].position;
+		const Vec3& p2 = m_vertices[i2].position;
+		Vec3 normal = Cross(p0 - p1, p2 - p0);
+		normal.Normalize();
+		normals[i0] += normal;
+		normals[i1] += normal;
+		normals[i2] += normal;
+	}
+
+	for (size_t i=0; i<normals.size(); ++i) {
+		m_vertices[i].normal = normals[i].Normalized();
 	}
 }
 

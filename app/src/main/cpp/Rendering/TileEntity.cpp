@@ -1,5 +1,5 @@
 #include "TileEntity.hpp"
-#include "Vertex.hpp"
+#include "../Resources/Vertex.hpp"
 
 
 namespace mrange {

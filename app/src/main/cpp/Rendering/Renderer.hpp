@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Platform.hpp"
+#include "../Platform/Platform.hpp"
 #include "BasicCamera.hpp"
 
 #include <GLES3/gl3.h>

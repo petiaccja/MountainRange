@@ -1,6 +1,8 @@
 #pragma once
 
 #include <InlineMath.hpp>
+#include <vector>
+
 
 namespace mrange {
 
@@ -96,21 +98,24 @@ PixelT &Image<PixelT>::operator()(Vec2u coordinate) {
 
 template<class PixelT>
 auto Image<PixelT>::SamplePoint(Vec2 coordinate) const -> FloatPixelT {
-	coordinate = Max(Vec2(0,0), Min(Vec2(m_width, m_height), coordinate));
-	Vec2u icoord = Vec2u(coordinate + 0.5f);
+	Vec2 dim = { m_width, m_height };
+	coordinate = Max(Vec2(0,0), dim*coordinate);
+	Vec2u icoord = Min(Vec2u(m_width-1, m_height-1), Vec2u(coordinate));
 	return operator()(icoord);
 }
 
 
 template<class PixelT>
 auto Image<PixelT>::SampleBilinear(Vec2 coordinate) const -> FloatPixelT {
-	coordinate = Max(Vec2(0,0), Min(Vec2(m_width, m_height), coordinate));
+	Vec2 dim = { m_width, m_height };
+	coordinate = Max(Vec2(0,0), dim*coordinate);
 	Vec2u c0 = Vec2u(coordinate);
 	Vec2u c1 = c0 + Vec2u(1,0);
 	Vec2u c2 = c0 + Vec2u(0,1);
 	Vec2u c3 = c0 + Vec2u(1,1);
 
 	Vec2u maxVec = { m_width-1, m_height-1 };
+	c0 = Min(c0, maxVec);
 	c1 = Min(c1, maxVec);
 	c2 = Min(c2, maxVec);
 	c3 = Min(c3, maxVec);
@@ -120,7 +125,7 @@ auto Image<PixelT>::SampleBilinear(Vec2 coordinate) const -> FloatPixelT {
 
 	FloatPixelT bottom = (1-t)*FloatPixelT(operator()(c0)) + t*FloatPixelT(operator()(c1));
 	FloatPixelT top = (1-t)*FloatPixelT(operator()(c2)) + t*FloatPixelT(operator()(c3));
-	return (1-u)*bottom + t*top;
+	return (1-u)*bottom + u*top;
 }
 
 
